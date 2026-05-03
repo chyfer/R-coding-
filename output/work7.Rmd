@@ -1,0 +1,74 @@
+---
+title: "work"
+author: "Zhanbo Guo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+# Lab 7: ANOVA
+
+## Introduction
+
+This project practises ANOVA models in R. The aim is to compare group means across multiple groups and decide whether there are statistically significant differences.
+
+## Files
+
+- `Computer lab 7.1.R`: original R script for Exercise 1
+- `data/`: dataset folder
+- `output/`: output figures
+
+## Load data
+
+```{r}
+fish <- read.csv("datas/fish1.csv", stringsAsFactors = T)
+#stringsAsFactors = TRUE converts text columns into factors, which allows R to treat categorical variables as groups in statistical analyses.
+str(fish)   
+head(fish)
+```
+## Boxplot of fish weight by strain
+
+This code creates a boxplot of fish weight for each strain. It allows the distribution, median, spread and possible outliers of weight to be compared across different Tilapia strains.
+
+```{r}
+with(fish, boxplot(weight ~ Strain))
+```
+## Edited boxplot
+
+The boxplot was edited to improve readability. The x-axis and y-axis labels were added, the box width was reduced using `boxwex`, and the y-axis range was set from 0 to 5 using `ylim`.
+
+```{r}
+# Create an edited boxplot with axis labels, thinner boxes, and a fixed y-axis range
+with(fish, boxplot(weight ~ Strain,
+                   xlab = "Tilapia strain",
+                   ylab = "Weight",
+                   boxwex = 0.5,
+                   ylim = c(0, 5)))
+```
+
+## Test for equal group variances
+
+Before conducting ANOVA, Bartlett’s test was used to test whether the variance of fish weight was equal across different Tilapia strains.
+
+```{r}
+with(fish, bartlett.test(weight ~ Strain))
+```
+Bartlett’s test showed no significant difference in variance among the three Tilapia strains, χ²(2) = 0.505, p = 0.777. Therefore, we do not reject the null hypothesis. This suggests that the assumption of equal group variance is reasonable, so a standard one-way ANOVA can be used.
+
+## Pairwise t-tests
+
+Because the ANOVA compares all strains together, pairwise t-tests were used to identify which specific Tilapia strains differed from each other. Since Bartlett’s test suggested that the equal variance assumption was reasonable, `pool.sd = TRUE` was used.
+
+```{r}
+with(fish, pairwise.t.test(weight, Strain, pool.sd = TRUE))
+```
+
+## Result
+
+The pairwise t-test table gives the adjusted p-values for each pairwise comparison between Tilapia strains.
+
+The results suggest that:
+
+- Strain A was significantly different from Strain B, with an adjusted p-value of 0.004.
+- Strain A was not significantly different from Strain C, with an adjusted p-value of 0.16.
+- Strain B was not significantly different from Strain C, with an adjusted p-value of 0.16.
+
+Therefore, the only statistically significant pairwise difference was between Strain A and Strain B.
