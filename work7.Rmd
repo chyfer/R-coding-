@@ -4,17 +4,13 @@ author: "Zhanbo Guo"
 date: "`r Sys.Date()`"
 output: html_document
 ---
-# Lab 7: ANOVA
 
+# 7.1
 ## Introduction
+The first set of exercises involves comparing sample measurements from three different Strains of Tilapia. Unlike much aquaculture farming there are many reasons to think that Tilapia could be farmed sustainably. As such (in my hypothetical world) CSIRO is working on identifying the most promising Tilapia Strains for commercial development. To manage bacterial growth in the grow-out ponds the fish need to be harvested at 90 days. The experiment involved feeding all three Tilapia strains the same diet and measuring the fish weight at harvest.
 
+## Method
 This project practises ANOVA models in R. The aim is to compare group means across multiple groups and decide whether there are statistically significant differences.
-
-## Files
-
-- `Computer lab 7.1.R`: original R script for Exercise 1
-- `data/`: dataset folder
-- `output/`: output figures
 
 ## Load data
 
@@ -22,6 +18,11 @@ This project practises ANOVA models in R. The aim is to compare group means acro
 fish <- read.csv("datas/fish1.csv", stringsAsFactors = T)
 #stringsAsFactors = TRUE converts text columns into factors, which allows R to treat categorical variables as groups in statistical analyses.
 str(fish)   
+#  The summary tells us we have a factor variable "Strain" with 3 levels.
+#  The three levels of the factor are our three fish varieties A, B, and C.
+#  Note: if your variable shows up as a 'character' variable, you can run the command
+#       fish$Strain <- as.factor(fish$Strain)
+#  to turn it into a factor variable
 head(fish)
 ```
 ## Boxplot of fish weight by strain
@@ -31,6 +32,9 @@ This code creates a boxplot of fish weight for each strain. It allows the distri
 ```{r}
 with(fish, boxplot(weight ~ Strain))
 ```
+Our boxplot tells us that Strain A might be different 
+to Strain B but there are no striking differences 
+
 ## Edited boxplot
 
 The boxplot was edited to improve readability. The x-axis and y-axis labels were added, the box width was reduced using `boxwex`, and the y-axis range was set from 0 to 5 using `ylim`.
@@ -53,22 +57,186 @@ with(fish, bartlett.test(weight ~ Strain))
 ```
 Bartlett’s test showed no significant difference in variance among the three Tilapia strains, χ²(2) = 0.505, p = 0.777. Therefore, we do not reject the null hypothesis. This suggests that the assumption of equal group variance is reasonable, so a standard one-way ANOVA can be used.
 
-## Pairwise t-tests
+## One-way ANOVA
+```{r}
+with(fish,oneway.test(weight~Strain, var.equal=TRUE))
+```
+p<0.05. We reject the null hypothesis. There is evidence that at least one Tilapia strain has a different mean harvest weight.
 
-Because the ANOVA compares all strains together, pairwise t-tests were used to identify which specific Tilapia strains differed from each other. Since Bartlett’s test suggested that the equal variance assumption was reasonable, `pool.sd = TRUE` was used.
-
+## Pairwise t.test
 ```{r}
 with(fish, pairwise.t.test(weight, Strain, pool.sd = TRUE))
 ```
+Null hypothesis：the two Strain means are equal
+Alternative hypothesis：the two Strain means are different
 
-## Result
+##Conclusion
+A one-way ANOVA showed a significant difference in mean harvest weight among the three Tilapia strains, F-test p = 0.005597. Bartlett’s test suggested that the equal variance assumption was reasonable, p = 0.7769. Pairwise t-tests with Holm adjustment showed that Strain A differed significantly from Strain B, but Strain C did not differ significantly from either A or B.
 
-The pairwise t-test table gives the adjusted p-values for each pairwise comparison between Tilapia strains.
+#7.2
+## Introduction
 
-The results suggest that:
+This exercises concerns an analysis of an experiment trying to understand how water
+temperature affects the activity level of sea snails. Four different water temperatures are considered: 14 degree C, 18 degree C, 22 degree C, and 26 degrees C, and thirty sea snails are observed at each temperature level. As the experiment takes place in the lab, it is possible to carefully control the water temperature. The amount of activity of each snail, over a 12 hour period, was recorded and tabulated in the Snail1.csv data file. 
 
-- Strain A was significantly different from Strain B, with an adjusted p-value of 0.004.
-- Strain A was not significantly different from Strain C, with an adjusted p-value of 0.16.
-- Strain B was not significantly different from Strain C, with an adjusted p-value of 0.16.
+Structure of testing for multiple group comparisons when the assumption of equal group variance is not met.
 
-Therefore, the only statistically significant pairwise difference was between Strain A and Strain B.
+## Load data
+
+First, the `Snail1.csv` data file is loaded into R. The structure and variable names are then checked to confirm how the activity and temperature variables are stored.
+
+```{r}
+Snails <- read.csv("datas/Snails1.csv", stringsAsFactors = TRUE)
+
+str(Snails)
+snails$Treatment <- as.factor(snails$Treatment) #if treatment is character not factor
+
+summary(snails)
+head(snails)
+```
+
+## Summary statistics
+
+The mean and standard deviation of active time were calculated for each temperature treatment. The mean provides an initial comparison of average snail activity across the four temperature groups, while the standard deviation shows how much variation there is within each group.
+
+```{r}
+with(snails, tapply(Active.time, Treatment, mean))
+with(snails, tapply(Active.time, Treatment, sd))
+```
+In trreatment groups, Active.time mean and sd
+Previously we looked at the group means and group variances (sd) using the Pivot table
+function.  The Pivot tabel in Excel is a really useful function for this work. 
+Can also do this directly in R using the 'tapply' command.
+
+## Boxplot of active time by treatment
+
+A boxplot was created to visually compare the distribution of sea snail active time across the four temperature treatments. This plot helps show differences in median activity level, spread, and possible outliers between treatment groups.
+
+```{r}
+boxplot(Active.time ~ Treatment, data = snails,
+        xlab = "Water temperature treatment",
+        ylab = "Active time",
+        main = "Sea snail active time by temperature treatment")
+```
+
+The boxplot provides an initial visual comparison of snail activity across temperature treatments. Differences in the position of the boxes suggest possible differences in activity levels between temperature groups, while differences in box height and whisker length suggest possible unequal variation between groups.
+
+## Boxplot of active time by treatment
+
+A boxplot was created to compare the distribution of sea snail active time across the four temperature treatments. The y-axis shows the time active in minutes over a 12-hour period.
+
+```{r}
+boxplot(Active.time ~ Treatment, data = snails,
+        ylab = "time active (mins)",
+        main = "sea snail temperature experiment",
+        boxwex = 0.5,
+        col = "grey")
+```
+
+The boxplot provides an initial visual comparison of snail activity across temperature treatments. Differences in the position of the boxes suggest possible differences in activity levels, while differences in the spread of the boxes suggest possible unequal group variances.
+
+## Bartlett test for equal group variances
+
+A Bartlett test was used to test whether the variance in active time was equal across the four temperature treatments. This step is important because the choice of ANOVA method depends on whether the equal variance assumption is met.
+
+```{r}
+with(snails, bartlett.test(Active.time ~ Treatment))
+```
+
+The null hypothesis of the Bartlett test is that the group variances are equal. If the p-value is less than 0.05, the null hypothesis is rejected, indicating that the equal variance assumption is not met. In that case, an unequal-variance one-way ANOVA should be used.
+
+## Unequal-variance one-way ANOVA
+
+Since the Bartlett test indicated that the equal variance assumption was not met, an unequal-variance one-way ANOVA was used to test whether mean active time differed among the four temperature treatments.
+
+```{r}
+with(snails, oneway.test(Active.time ~ Treatment, var.equal = FALSE))
+```
+
+The null hypothesis is that the mean active time is the same across all temperature treatments. If the p-value is less than 0.05, the null hypothesis is rejected, indicating that at least one temperature treatment has a significantly different mean active time.
+
+## Pairwise t-tests
+
+Since the unequal-variance one-way ANOVA tests only whether at least one group mean is different, pairwise t-tests were used to identify which specific temperature treatments differed from each other. Because the equal variance assumption was not met, the pairwise tests were run with `pooled.sd = FALSE`.
+
+```{r}
+with(snails, pairwise.t.test(Active.time, Treatment, pooled.sd = FALSE))
+#causes the sd is not same
+```
+
+The pairwise t-test output gives adjusted p-values for each comparison between temperature treatments. If a p-value is less than 0.05, the two temperature treatments are considered significantly different in mean active time. If a p-value is greater than 0.05, there is insufficient evidence to conclude that the two treatments differ.
+
+##conclusion
+14 degrees is different to 18 degrees (p-value <0.001)
+14 degrees is different to 22 degrees (p-value <0.001)
+14 degrees is not different to 26 degrees (p-value = 0.9)
+
+18 degrees is different to 22 degrees (p-value <0.001)
+18 degrees is different to 26 degrees (p-value <0.001)
+
+22 degrees is different to 26 degrees (p-value <0.001)
+
+#7.3
+The Tilapia1.csv data file contains measurements on the length (in cm) of four strains of Tilapia at the time of harvest.
+```{r}
+Tilapia<-read.csv("datas/Tilapia1.csv", stringsAsFactors = T)
+str(Tilapia)
+head(Tilapia)
+tail(Tilapia)
+```
+```{r}
+with(Tilapia,boxplot(Length~Strain))
+```
+null: all variance are equal in 4 strains 
+```{r}
+with(Tilapia,bartlett.test(Length~Strain))
+```
+cause p>0.05 so do not reject the hypothesis
+```{r}
+oneway.test(Length ~ Strain, data = Tilapia, var.equal = TRUE)
+with(Tilapia, oneway.test(Length ~ Strain, var.equal=T))
+```
+causes p<0.05 so we reject hypothesis which mean that mean are not equal
+
+pairwise t-test
+
+```{r}
+with(Tilapia, pairwise.t.test(Length,Strain, pool.sd = T))
+```
+
+```{r}
+with(Tilapia, tapply(Length, Strain, mean))
+
+```
+
+#7.4
+```{r}
+sardine<-read.csv("datas/cleardata.csv", stringsAsFactors = T)
+str(sardine)
+```
+```{r}
+with(sardine,boxplot(Microplastics~Location))
+```
+```{r}
+with(sardine,bartlett.test(Microplastics~Location))
+```
+```{r}
+with(sardine, oneway.test(Microplastics~Location, var.equal=TRUE))
+```
+```{r}
+with(sardine, pairwise.t.test(Microplastics,Location,pool.sd = T))
+```
+
+#7.5
+Recall the power of a test is defined as the chance of identifying a true significant difference. The
+```{r}
+power.t.test(n = , delta = 100, sd = 150, sig.level = 0.05,
+             power = 0.8,
+             type = "one.sample")
+power.t.test(n = , delta = 300, sd = 280, sig.level = 0.05,
+             power = 0.8,
+             type = "two.sample")
+power.t.test(n =50 , delta = 100, sd = 280 , sig.level =0.05 , power = , type = c("paired")) 
+
+```
+

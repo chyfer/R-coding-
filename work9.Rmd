@@ -1,0 +1,158 @@
+---
+title: "work9"
+author: "Zhanbo Guo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+#9.1 
+##Intro
+The first example is for a two-sample non-parametric test. The second example is for a paired nonparametric test. The third example is for multiple group comparisons. The three examples follow the same format as for the parametric tests you have already worked through (can you see the similarities between the tests we have seen to date and the non-parametric tests?). For the twosample test you start with a boxplot and then move on to the formal test. For the paired data example you start with a horizontal boxplot, and then move on to the formal test. For the multiple group example you start with a boxplot, then conduct a test to try and identify at least one difference, and if (and only if) you identify one difference you then move on to pair-wise testing, with an adjustment to the p-values to control the Type I error rate.
+## data 9.1.1 two-sample non-parametric test
+```{r}
+tuna.data <- read.csv("datas/TunaMF.csv", stringsAsFactors = T)
+head(tuna.data)
+str(tuna.data)
+summary(tuna.data)
+```
+boxplot
+```{r}
+with(tuna.data,boxplot(Fish.cm~Type,
+                       names =c("Females", "Males"),
+                       ylab = "Tuna length (cm)",
+                       xlab = "Tuna",
+                       main = "Don't add title as you will double up with Word caption!",
+                       boxwex=0.6,
+                       col = "grey",
+                       horizontal = F,
+                       cex.axis=0.9, cex.lab=1.0,cex.main=0.7))
+```
+wilcox command
+It corresponds to the previous two-sample t-test. However, due to the small sample size/uncertain distribution, it is replaced with the non-parametric Wilcoxon rank-sum test/Mann-Whitney test.
+```{r}
+with(tuna.data,wilcox.test(Fish.cm ~ Type))
+```
+## 9.1.2 paired non-parametric test
+```{r}
+bear.data <- read.csv("datas/Bears.csv")
+head(bear.data)
+str(bear.data)
+```
+```{r}
+#paired difference plot
+with(bear.data, boxplot(Hind.leg - Fore.leg,
+                        ylab = "",
+                        xlab = "Hind leg cm minus Fore leg cm",
+                        main = " don't add a title",
+                        boxwex=0.6,
+                        col = "grey",
+                        horizontal = T,
+                        font.main=4, cex.axis=1.0, cex.lab=1.1, cex.main=1.3))
+```
+
+```{r}
+with(bear.data,wilcox.test(Hind.leg, Fore.leg, paired=T ))
+with(bear.data,wilcox.test(Hind.leg, Fore.leg, paired=T , exact =F))
+with(bear.data,wilcox.test(Hind.leg, Fore.leg, exact =F ))
+```
+
+## 9.1.3 multiple group comparisons
+```{r} 
+snailkw <-read.csv("datas/SnailsKW.csv", stringsAsFactors = T)
+head(snailkw)
+str(snailkw)
+summary(snailkw)
+```
+```{r}
+with(snailkw,tapply(Active.time, Treatment,median))
+with(snailkw,tapply(Active.time, Treatment,mean))
+with(snailkw,tapply(Active.time, Treatment,sd))
+with(snailkw,tapply(Active.time, Treatment,quantile))
+with(snailkw,boxplot(Active.time~Treatment, las =1))
+```
+
+```{r}
+with(snailkw,kruskal.test(Active.time~Treatment)) 
+with(snailkw,kruskal.test(Active.time,Treatment)) 
+with(snailkw,pairwise.wilcox.test(Active.time,Treatment, exact =F))
+```
+
+#9.2
+##intro 
+The
+Flies.csv data file contains a measure of the abundance of flies around shrubs at five different sites, expressed as flies per cubic metre. The samples were taken at the start and end of spring. The entomologist is interested in understanding if the abundance of flies is the same at the start and end of spring. As this is a small data set the entomologist has decided that a non-parametric test is most appropriate. Conduct the relevant testing procedure (graph and then appropriate test). Draw a conclusion for the specified research question. Can you reconcile the visual representation of the data with the formal test result?
+
+##method
+```{r}
+flies<-read.csv("datas/Flies.csv", stringsAsFactors = T)
+str(flies)
+```
+```{r}
+#paired difference plot
+with(flies, boxplot(Sept - Nov,
+                    ylab = "",
+                    xlab = "September minus November fly abundance",
+                    main = "don't add a title",
+                    boxwex = 0.6,
+                    col = "grey",
+                    horizontal = TRUE))
+
+```
+
+```{r}
+with(flies, wilcox.test(Sept, Nov, paired = T)) 
+```
+As the p-value is greater than 0.05, we do not reject the null hypothesis. There is insufficient evidence to conclude that fly abundance differs between September and November.
+However, at the 10% significance level, there may be weak evidence of a difference, which is worth noting because the sample size is very small.
+
+#9.3
+#intro
+Before being discharged into a local river system, wastewater from a local treatment plant is stored in ponds. Within the plant there are two different treatment processing flows, with water from one process temporarily stored in Pond 1 and water from the second process is temporarily stored in Pond 2. The PhPonds.csv data set contains eight measurements from Pond 1 and seven measurements from Pond 2. The plant manager is interested in knowing whether there are differences in the pH level in each temporary storage pond. As the data set is small it has been decided that a non-parametric test is appropriate. Conduct the relevant test process and draw a conclusion that is appropriate for the research question. Note that the data is in wide format, so you’ll need to adapt the script from the example (the reference to converting the data in Excel is if you require a boxplot on paired data).
+
+##data 
+```{r}
+ph<-read.csv("datas/PhPonds.csv", stringsAsFactors=T)
+str(ph)
+```
+##graph
+```{r}
+with(ph, boxplot(Sample.1, Sample.2,
+                 names = c("Pond 1", "Pond 2"),
+                 ylab = "pH level",
+                 xlab = "Pond",
+                 boxwex = 0.6,
+                 col = "grey"))
+
+```
+
+```{r}
+with(ph,wilcox.test(Sample.1,Sample.2, exact = FALSE))
+```
+As the p-value is less than 0.05, we reject the null hypothesis. There is evidence that pH levels differ between Pond 1 and Pond 2.
+
+#9.4
+##intro
+The data in the coal_kw_example.csv data file is similar to the Ash content data you have previously seen. The context is also similar to a previous example, except this time we have three possible mines competing for a coal contract. The data is in long format. Conduct the appropriate testing process to assess whether there is a difference in ash content between the three mines, and which mine you may wish to give your contract to. Do the test results match your boxplot? Make sure that you have the labels correctly specified. There may be a question in Assignment two that asks for similar steps, so it is worth spending some time on this question.
+##data
+```{r}
+coal<-read.csv("datas/coal_kw_example.csv", stringsAsFactors = T)
+str(coal)
+```
+```{r}
+with(coal, boxplot(ash ~ mine,
+                   names = c("Mine 1", "Mine 2", "Mine 3"),
+                   ylab = "Ash content",
+                   xlab = "Mine",
+                   boxwex = 0.6,
+                   col = "grey",
+                   las = 1))
+
+```
+```{r}
+with(coal, kruskal.test(ash ~ mine))
+
+```
+```{r}
+with(coal, pairwise.wilcox.test(ash, mine,
+                                exact = FALSE))
+```
+Pairwise Wilcoxon tests showed evidence of a difference in ash content between Griffin and Premier mines (p = 0.038). There was no evidence of a difference between New Mine and Premier (p = 0.970). The comparison between Griffin and New Mine was not significant at the 5% level (p = 0.068), although it may suggest weak evidence of a difference at the 10% level.
