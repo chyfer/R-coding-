@@ -1,0 +1,230 @@
+---
+title: "work10"
+author: "Zhanbo Guo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+#1. The first exercise is a guided example that walks you through some of the basic plotting
+features available in R. There is no data set for this example.
+#2. linear-log model. The
+data file for this exercise is Biomassgrowthdata.csv.
+```{r}
+b.mass <- read.csv("datas/Biomassgrowthdata.csv") 
+head(b.mass)
+summary(b.mass)
+str(b.mass)
+```
+##ploting
+```{r}
+
+plot(Biomass~Time, pch= 1,data = b.mass) # does not look linear
+
+plot(log(Biomass)~Time, pch=2,data = b.mass) # does not look linear
+
+plot(log(Biomass)~log(Time), pch=3,data = b.mass) # plausible, but not great
+
+plot(Biomass~log(Time), pch=4,data = b.mass) # The best option, i think...
+```
+```{r}
+plot(Biomass~log(Time), 
+     pch = 19,
+     col = "grey",
+     ylab = "Biomass (T)",
+     xlab = "Time (log scale)",
+     data = b.mass)
+
+```
+
+```{r}
+lm.1 <- lm(Biomass~log(Time), data = b.mass)
+#  The above script line says fit a trend line to the data in the object 'b.mass'
+#  where the y-values (Biomass) are on the original scale and the x-axis values
+#  (Time) are on a log scale.
+#  As we are fitting a line R knows to add the intercept term automatically
+#  Then once the model has been fitted save the results to the object lm.1
+#  So lm.! has the details we are interested in.
+coef(lm.1) #Biomass = a + b × log(Time)
+
+```
+```{r}
+plot(Biomass~log(Time), 
+     las =1,   #  this is the line that i have added. It indicates that all the numbers on the coordinate axes are displayed horizontally, which is relatively easy to read
+     pch = 19,
+     col = "grey",
+     ylab = "Biomass (T)",
+     xlab = "Time (log scale)",
+     data = b.mass)
+abline(a =0.4764123, b = 0.8319737, lty=2, lwd=2, col = "green")
+abline(lm.1, lty =1, col ="red")
+legend("topleft", legend="trend line", lty=2, lwd=2, col ="red", bty="n")
+```
+##example work
+```{r}
+plot(Biomass~log(Time), 
+     pch = 19,
+     col = "grey",
+     ylab = "Biomass (T)",
+     xlab = "Time (log scale)",
+     las = 1,
+     data = b.mass)
+abline(lm.1, lty=2, lwd=2, col = "black")
+
+legend("topleft", legend=c("observation","trend"), lty=c(NA,2), pch =c(19,NA), 
+       lwd=c(NA,2), col =c("grey","black"), bty="n")
+```
+
+#3. log-linear model. The
+data file for this exercise is Yieldchangedata.csv.
+```{r}
+Y.data <- read.csv("datas/Yieldchangedata.csv")
+head(Y.data)
+str(Y.data)
+summary(Y.data)
+```
+```{r}
+plot(Yield~Year, data = Y.data)  #  not linear
+plot(log(Yield)~Year, data = Y.data)  #  looks approx. linear
+plot(Yield~log(Year), data = Y.data)  #  not liner
+plot(log(Yield)~log(Year), data = Y.data)  #  also approx. linear
+```
+```{r}
+plot(log(Yield)~Year, 
+     ylab = "Yield (log scale)",
+     xlab = "", # to suppress the xlab,
+     data = Y.data) 
+legend("topleft", legend = "observations", pch =1, bty ="n")
+lm2 <- lm(log(Yield)~Year, data = Y.data)
+coef(lm2)
+```
+```{r}
+plot(log(Yield)~Year, 
+     ylab = "Yield (log scale)",
+     xlab = "", # to suppress the xlab,
+     data = Y.data)  
+
+abline(lm2, lty =1, lwd=1, col ="grey")
+
+legend("topleft", legend=c("observation","trend"), lty=c(NA,1), pch =c(1,NA), 
+       lwd=c(NA,1), col =c("black","grey"), bty="n")
+```
+#4. log-log model. The
+data file for this exercise is distanceanddiversity.csv.
+```{r}
+diversity <- read.csv("datas/distanceanddiversity.csv")
+head(diversity)
+str(diversity)
+summary(diversity)
+```
+
+```{r}
+plot(diversity~altitude, data = diversity)  # not linear
+plot(log(diversity)~altitude, data = diversity)  # not great
+plot(diversity~log(altitude), data = diversity)  # not linear
+plot(log(diversity)~log(altitude), data = diversity)  # closest to a line, so we go with this option
+```
+```{r}
+lm3 <- lm(log(diversity)~log(altitude), data = diversity)
+coef(lm3)
+
+plot(log(diversity)~log(altitude), data = diversity, type = "p", pch=19, col ="grey",
+     ylab = "Diversity Index (log scale)", 
+     xlab ="Altitude above sea level (log scale)", 
+     main ="Relationship between diversity and altitude",
+     xlim = c(4,5),
+     ylim = c(-4.1,0),
+     font.main=4,
+     las=1)
+abline(lm3)
+legend("bottomleft", legend=c("trend","observation"), lty=c(1,NA), pch =c(NA,19), 
+       lwd=c(1,NA), col =c("black","grey"), bty="n")
+```
+#5
+In the polychlorinated biphenyl.csv data file the response variate is the concentration of polychlorinated
+biphenyl (PCB) residue in fish caught from a lake. The explanatory variable is the age of the fish. PCBs are bad. As the fish in the lake were stocked as yearlings, and tagged at release, their age is known. To obtain a measure of the PCB concentration in the fish lethal methods were required. The PCB concentration is recorded in parts per million. The fish vary in age from one year to 12 years. The relationship of interest is whether or not the PCB concentration in the fish  increases the longer they have been in the lake. 1. Start a new script file and read the data into R. 2. Examine the data and through use of an iterative process of visual comparisons of the data with different transformation determine the plot that looks most linear. 3. Edit your plot so that it has appropriate details. 4. Estimate the linear model that matches the data transformations you have performed and add the trend line to your scatter plot. 5. Add an appropriate legend to the plot.
+
+```{r}
+PCBM<-read.csv("datas/polychlorinated biphenyl.csv")
+str(PCBM)
+```
+```{r}
+plot(PCB~Age,data = PCBM)
+plot(log(PCB)~Age,data = PCBM)
+plot(PCB~log(Age),data = PCBM)
+plot(log(PCB)~log(Age),data = PCBM)
+```
+```{r}
+lm4<-lm(log(PCB)~log(Age), data=PCBM)
+coef(lm4)
+
+plot(log(PCB) ~ log(Age),
+     data = PCBM,
+     pch = 19,
+     col = "grey",
+     las = 1,
+     xlab = "Age of fish (log scale)",
+     ylab = "PCB concentration (log ppm)")
+
+abline(lm4, lty = 2, lwd = 2, col = "red")
+
+legend("topleft",
+       legend = "Trend line",
+       lty = 2,
+       lwd = 2,
+       col = "red",
+       bty = "n")
+
+```
+
+#6
+The poplar.csv data file contains measurements for the tulip poplar, Liriodendron tulipifera. Therelationship under investigation is that the dry weight of the branches, measured in kilograms, can be explained (predicted) by the diameter of the tree, where the diameter is measured in centimetres at a height of 140cm (approximately chest height) above ground. The wood from these trees can be used in the housing construction industry. Because we say diameter ‘explains’ weight, we plot diameter on the horizontal and weight on the vertical.
+1. Start a new script file and read the data into R.
+2. Examine the data and through use of an iterative process of visual comparisons of the data with different transformation determine the plot that looks most linear.
+3. Edit your plot so that it has appropriate details.
+4. Estimate the linear model that matches the data transformations you have performed and add the trend line to your scatter plot.
+5. Add an appropriate legend to the plot
+
+```{r}
+# Poplar branch weight and tree diameter
+
+# 1. Read in the data
+poplar <- read.csv("datas/poplar.csv")
+
+# Examine the data
+head(poplar)
+str(poplar)
+summary(poplar)
+
+# 2. Try different transformations
+plot(weight ~ diameter, data = poplar)
+plot(log(weight) ~ diameter, data = poplar)
+plot(weight ~ log(diameter), data = poplar)
+plot(log(weight) ~ log(diameter), data = poplar)
+poplar.lm <- lm(log(weight) ~ log(diameter), data = poplar)
+```
+
+```{r}
+plot(log(weight) ~ log(diameter),
+     data = poplar,
+     pch = 19,
+     col = "grey",
+     las = 1,
+     xlab = "Tree diameter (log cm)",
+     ylab = "Branch dry weight (log kg)",
+     main = "Relationship between branch dry weight and tree diameter")
+
+poplar.lm <- lm(log(weight) ~ log(diameter), data = poplar)
+
+abline(poplar.lm,
+       lty = 2,
+       lwd = 2,
+       col = "red")
+
+legend("topleft",
+       legend = "Trend line",
+       lty = 2,
+       lwd = 2,
+       col = "red",
+       bty = "n")
+
+```
+
