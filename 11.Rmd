@@ -1,0 +1,355 @@
+---
+title: '11'
+author: "Zhanbo Guo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+#11.1
+The first exercise starts with the Biomassgrowthdata.csv. We look further at a statistical test of whether or not the slope and intercept point estimates are statistically different from zero, and also find the R2 value and number of observations. The model we are working with is a linear-log model.
+
+## data
+```{r}
+b.mass <- read.csv("datas/Biomassgrowthdata.csv") 
+
+head(b.mass)
+summary(b.mass)
+str(b.mass)
+```
+```{r}
+plot(Biomass~Time, pch= 1,data = b.mass) # does not look linear
+
+plot(log(Biomass)~Time, pch=2,data = b.mass) # does not look linear
+
+plot(log(Biomass)~log(Time), pch=3,data = b.mass) # plausible, but not great
+
+plot(Biomass~log(Time), pch=4,data = b.mass) # The best option, i think...
+```
+```{r}
+plot(Biomass~log(Time), 
+     las =1,
+     pch = 19,
+     col = "grey",
+     ylab = "Biomass (T)",
+     xlab = "Time (log scale)",
+     data = b.mass)
+lm.11.1 <- lm(Biomass~log(Time), data = b.mass) 
+summary(lm.11.1)
+
+plot(Biomass~log(Time), 
+     las =1,
+     pch = 19,
+     col = "grey",
+     ylab = "Biomass (T)",
+     xlab = "Time (log scale)",
+     data = b.mass)
+
+abline(lm.11.1, lty=2, lwd=1, col = "red")
+
+legend("topleft", legend=c("observations", "trend line"), 
+       lty=c(NA,2), lwd=c(NA,1), col =c("grey", "red"), pch = c(19,NA), bty ="n") 
+
+summary(lm.11.1)
+```
+#11.2
+Log-linear model. The data file for this exercise is Yieldchangedata.csv. Again, this exercise picks up where the computer lab left off last week, and we conduct a test to see whether the slope and intercept point estimates are statistically different from zero, and also find the R2 value and number of observations.
+##data
+```{r}
+Y.data <- read.csv("datas/Yieldchangedata.csv")
+
+#  Look at the data structure
+
+head(Y.data)
+str(Y.data)
+
+#  Now let's look at some basic plot options
+
+plot(Yield~Year, data = Y.data)  #  not linear
+plot(log(Yield)~Year, data = Y.data)  #  looks approx. linear
+plot(Yield~log(Year), data = Y.data)  #  not liner
+plot(log(Yield)~log(Year), data = Y.data)  #  also approx. linear
+```
+```{r}
+plot(log(Yield)~Year, 
+     ylab = "Yield (log scale)",
+     xlab = "", # to suppress the xlab as with time it is clear what is going on
+     data = Y.data)  
+lm2 <- lm(log(Yield)~Year, data = Y.data)
+
+summary(lm2)
+```
+
+```{r}
+summary(lm2)
+str(Y.data)
+```
+Formally the summary conducts the following tests:
+
+1. Intecept 
+H0: The intercept is zero.
+H1: The intecept is not zero.
+
+The 'point' estimate for the intercept is -57.2 and 
+as the p-value associated with the intercept is very small
+(p-value <0.001) therfore we reject the null.
+
+
+2. Slope (which is what we are interested in)
+H0: The slope is zero.
+H1: The slope is not zero.
+
+The point estimate on Year is 0.03 as the p-value associated with the slope is very small
+(p-value <0.001) we reject the null.
+
+As we have a log-linear model we can say the following:
+
+A one unit increase in years results in an
+expected increase in yield of 0.0304 x 100 =
+3.04 percent increase in yield.
+
+Note that as the Multiple R-squared value =  0.9155,
+we can say, the model explains 91.6% of the variation in the data
+
+We make our plot publication quality by:
+
+(i)  adding a trend line, and
+(ii) adding a legend
+```{r}
+plot(log(Yield)~Year, 
+     ylim =c(0,5),
+     ylab = "Yield (log scale)",
+     xlab =""  ,  
+     las=1,
+     data = Y.data)  
+
+abline(lm2, lty =1, lwd=1, col ="grey")
+
+legend("topleft", legend=c("Observations","Trend line"), lty=c(NA,1), pch =c(1,NA), 
+       lwd=c(NA,1), col =c("black","grey"), bty="n")
+```
+
+#11.3
+Exercise 3
+For exercise three, you have to start your own script file. The WingLength.csv data file contains
+information on the wing length of sparrows of different ages. The data have been reproduced from
+Zar JH (2010) Biostatistical Analysis. The data are suitable for regression analysis. Note: Age is
+measured in days and the Length variable is measured in cm.
+(a) Create a scatter plot of the data. As we can think of bird age ‘explaining’ wing length, place
+Age on the horizontal axis and Wing Length on the vertical axis.
+(b) The scatter plot suggests that a linear trend line would be a good fit to the data. Fit a linear
+trend line to the data and add an appropriate legend to your plot.
+(c) Write out the null and alternate hypothesis to test whether the slope is different to zero.
+(d) Transfer your final plot to a word document (make sure you know how to get the plot into a
+word document such that it is a high quality image) and also create a summary results table.
+The summary table must contain: (i) the point estimate for the intercept and the slope; (ii)
+the standard error for the intercept and the slope; (iii) the R2 value for the regression mode;
+(iv) the number of observations in the data set; and (v) a footnote star system that can
+identify which estimates are statistically different from zero at different significance levels.
+The example below provides a representation of what is required.
+##data
+
+```{r}
+Wing<-read.csv("datas/WingLength.csv")
+str(Wing)
+```
+
+```{r}
+plot(Length ~ Age,
+     data = Wing,
+     las = 1,
+     pch = 19,
+     col = "grey",
+     xlab = "Age (days)",
+     ylab = "Wing length (cm)",
+     main = "Relationship between sparrow age and wing length")
+
+lm.wing <- lm(Length~Age, data = Wing)
+abline(lm.wing, lty=2, lwd=1, col = "red")
+legend("topleft",
+       legend = c("Observations", "Trend line"),
+       pch = c(19, NA),
+       lty = c(NA, 2),
+       lwd = c(NA, 2),
+       col = c("grey", "red"),
+       bty = "n")
+```
+## Hypothesis Test for the Slope
+
+The hypotheses for testing whether the slope is different from zero are:
+
+```text
+H0: The slope is zero.
+H1: The slope is not zero.
+```
+
+More specifically:
+
+```text
+H0: βAge = 0
+H1: βAge ≠ 0
+```
+
+If the p-value for `Age` is less than 0.05, we reject the null hypothesis and conclude that age has a statistically significant relationship with wing length.
+
+## Summary Results
+
+```{r}
+# Extract useful model information
+summary(wing.lm)
+
+# Number of observations
+nrow(Wing)
+```
+
+#11.4
+Exercise 4
+The Poplar.csv data file contains measurements for the tulip poplar, Liriodendron tulipifera. The
+relationship under investigation is that the dry weight of the branches, measured in kilograms,
+can be explained (predicted) from the diameter of the tree, where the diameter is measured in
+centimetres at a height of 140cm (approximately chest height) above ground. The wood from
+these trees can be used in the housing construction industry. Because we say diameter ‘explains’
+weight, we plot diameter on the horizontal and weight on the vertical.
+(a) For the Poplar data prepare the following four exploratory scatter plots:
+• plot 1: diameter on the horizontal axis and weight on the vertical axis
+• plot 2: log of diameter on the horizontal axis and weight on the vertical axis
+• plot 3: diameter on the horizontal axis and log of weight on the vertical axis
+• plot 4: log of diameter on the horizontal axis and log of weight on the vertical axis
+(b) For the data representation that you think most closely approximates a line, create a scatter
+plot (including a legend) where a trend line has been fitted to the data. Try and use the
+various R commands to create a nice looking plot.
+```{r}
+# Read in the data
+Poplar <- read.csv("datas/Poplar.csv")
+```
+
+```{r}
+# Examine the data
+head(Poplar)
+str(Poplar)
+summary(Poplar)
+```
+
+## Exploratory Scatter Plots
+
+```{r}
+# Plot 1: original scale
+plot(weight ~ diameter,
+     data = Poplar,
+     las = 1,
+     pch = 1,
+     xlab = "Tree diameter (cm)",
+     ylab = "Branch dry weight (kg)",
+     main = "Weight vs Diameter")
+```
+
+```{r}
+# Plot 2: log of diameter
+plot(weight ~ log(diameter),
+     data = Poplar,
+     las = 1,
+     pch = 1,
+     xlab = "Tree diameter (log cm)",
+     ylab = "Branch dry weight (kg)",
+     main = "Weight vs Log Diameter")
+```
+
+```{r}
+# Plot 3: log of weight
+plot(log(weight) ~ diameter,
+     data = Poplar,
+     las = 1,
+     pch = 1,
+     xlab = "Tree diameter (cm)",
+     ylab = "Branch dry weight (log kg)",
+     main = "Log Weight vs Diameter")
+```
+
+```{r}
+# Plot 4: log-log plot
+plot(log(weight) ~ log(diameter),
+     data = Poplar,
+     las = 1,
+     pch = 1,
+     xlab = "Tree diameter (log cm)",
+     ylab = "Branch dry weight (log kg)",
+     main = "Log Weight vs Log Diameter")
+```
+
+#11.5
+The TunaCatch.csv data file contains information on the Tuna catch, Tuna fishing effort, measured
+in terms of fleet capacity, and the catch per unit of fishing effort. The relationship under
+investigation is how has the catch per unit of fishing effort has changed through time. In the data
+file Catch is the number of tuna landed, Effort is a measure of the number of hooks in the water,
+and Catch.P.Eff is a variable calculated as Catch divided by Effort.
+(a) Work through the same structured process of analysis used for other questions to determine
+what has been the trend change in the catch per unit of fishing effort through time. (Put
+time on the horizontal and catch per unit of fishing effort on the vertical)
+---
+title: "Lab 11 Exercise 5"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+## Exercise 5: Tuna Catch per Unit Effort Through Time
+
+The data set contains information on tuna catch, fishing effort, and catch per unit effort. The relationship of interest is how catch per unit effort has changed through time.
+
+```{r}
+# Read in the data
+Tuna <- read.csv("datas/TunaCatch.csv")
+```
+
+```{r}
+# Examine the data
+head(Tuna)
+str(Tuna)
+summary(Tuna)
+```
+
+## Exploratory Scatter Plots
+
+Time is the explanatory variable, so it is placed on the horizontal axis. Catch per unit effort is the response variable, so it is placed on the vertical axis.
+
+```{r}
+# Plot 1: original scale
+plot(Catch.P.Eff ~ Year,
+     data = Tuna,
+     las = 1,
+     pch = 1,
+     xlab = "Year",
+     ylab = "Catch per unit effort",
+     main = "Catch per Unit Effort vs Year")
+```
+
+```{r}
+# Plot 2: log of response variable
+plot(log(Catch.P.Eff) ~ Year,
+     data = Tuna,
+     las = 1,
+     pch = 1,
+     xlab = "Year",
+     ylab = "Catch per unit effort (log scale)",
+     main = "Log Catch per Unit Effort vs Year")
+```
+
+```{r}
+# Plot 3: log of explanatory variable
+plot(Catch.P.Eff ~ log(Year),
+     data = Tuna,
+     las = 1,
+     pch = 1,
+     xlab = "Year (log scale)",
+     ylab = "Catch per unit effort",
+     main = "Catch per Unit Effort vs Log Year")
+```
+
+```{r}
+# Plot 4: log-log plot
+plot(log(Catch.P.Eff) ~ log(Year),
+     data = Tuna,
+     las = 1,
+     pch = 1,
+     xlab = "Year (log scale)",
+     ylab = "Catch per unit effort (log scale)",
+     main = "Log Catch per Unit Effort vs Log Year")
+```
